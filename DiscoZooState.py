@@ -5,7 +5,7 @@ class DiscoZooState:
     ROWS = 5
     COLS = 5
 
-    def __init__(self, parent, remaining_placements,last_click,rows,cols):
+    def __init__(self, parent, remaining_placements,last_click):
         self.remaining_placements = remaining_placements
         self.last_click = last_click
         self.parent = parent
