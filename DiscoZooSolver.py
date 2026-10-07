@@ -16,9 +16,17 @@ class DiscoZooSolver:
         
         heapq.heappush(frontier,initialState)
 
-        while len(frontier) > 0: # same as while len(frontier) > 0
+        iter = 0
 
+        while len(frontier) > 0: # same as while len(frontier) > 0
+            iter +=1
+            
             current = heapq.heappop(frontier)
+            if iter % 2000 == 0:
+                print(f"[A*]: {iter} states explored\n" 
+                      f"Frontier size: {len(frontier)}\n"
+                      f"Depth: {current.gCost}"
+                      f"Remaining placements: {len(current.remaining_placements)}")
 
             if (current.isFinal()):
                 return current
@@ -53,9 +61,10 @@ class DiscoZooSolver:
 
         
         raw_clicks.reverse()
+        return raw_clicks
         
-        for i,click in enumerate(raw_clicks,1):
-            print(f"Click {i}: {click}")
+        # for i,click in enumerate(raw_clicks,1):
+        #     print(f"Click {i}: {click}")
            
 
     @staticmethod
@@ -75,35 +84,43 @@ class DiscoZooSolver:
         for i,click in enumerate(raw_clicks,1):
             print(f"Click {i}: {click[0]+1},{click[1]+1}")
             i+=1
-
-
-if __name__ == "__main__":
-    koala = [(0,0), (0,1), (1,1)]
-    horse = [(0,0),(1,0),(2,0)]
     
-    koala_placements = findPlacements(koala)
-    
+    @staticmethod
+    def printBoard(clicks,rows=5,cols=5):
 
-    initialState = DiscoZooState(None,koala_placements,None)
+        
 
-    sol = DiscoZooSolver.aStarSolver(initialState)
+        max_row_len = len(f"Row {rows} ")
 
-    if (sol is not None):
-        DiscoZooSolver.backtrack(sol)
-    else:
-        print("No solution found?? Why?")
+        header_pad = " "*(max_row_len+1)
 
-    # hippo = [(0, 0), (2,0),(0,2),(2,2)]
-    # hippo_placements = findPlacements(hippo)
-    # initialStateHippo = DiscoZooState(None,hippo_placements,None)
-    # hippo_sol = DiscoZooSolver.aStarSolver(initialStateHippo)
+        max_cell_len = max(len(f" Col {cols} "), len(f"[{len(clicks)}]"))
 
-    # print(f"\n\n---SASQUATCH SOLUTION---")
-    # if (hippo_sol is not None):
-    #     DiscoZooSolver.backtrack(hippo_sol)
+        col_headers = "".join(f" Col {c+1} ".center(max_cell_len) + " " for c in range(cols))
+        print(header_pad + col_headers)
 
-    # else:
-    #     print("No solution found?? Why?")
+        seperator = " "*max_row_len+"+"+("-"*max_cell_len+"+")*cols
+
+        click_nums = {coord:step for step,coord in enumerate(clicks,1)}
+        print(seperator)
+
+        for r in range(rows):
+
+            row_label = f"Row {r+1} ".ljust(max_row_len)
+            row_cells=[]
+
+            for c in range(cols):
+                
+                outp = f"[{click_nums[(r,c)]}]" if (r,c) in clicks else "."
+                row_cells.append(outp.center(max_cell_len))
+                
+            print(row_label+"|"+"|".join(row_cells)+"|")
+            print(seperator)
+
+
+
+
+
 
 
 

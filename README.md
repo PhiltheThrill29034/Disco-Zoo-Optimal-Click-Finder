@@ -7,3 +7,8 @@ In the game, each animal has a specific pattern, a set of points in a 5x5 grid. 
 The question this aroused in me was this: given a pattern, what is the minimum number of points I have to click to eliminate all possible repositions?
 
 I decided to build this so I can figure out, for any pattern, how to make the least amount of attempts to find the animal
+
+Of course, this algorithm scales to a bigger grid, and to bigger patterns. It finds out the optimal click sequences, or nodes, that eliminate all possible placements of any shape on the grid.
+
+Example run:
+![Example Solver Run](assets/example_discozoosolver_run.jpg)

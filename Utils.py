@@ -1,6 +1,15 @@
 import re
 
-def findPlacements(pattern, edge = 5,constraint = []):
+
+CYAN = "\033[96m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+RED = "\033[91m"
+BOLD = "\033[1m"
+DIM = "\033[2m"
+RESET = "\033[0m"
+
+def findPlacements(pattern, rows = 5,cols=5, constraint = None):
     if constraint is None:
         constraint = set()
     else:
@@ -21,8 +30,8 @@ def findPlacements(pattern, edge = 5,constraint = []):
     placements = []
 
     
-    for i in range(0,edge-height+1):
-        for j in range(0,edge-width+1):
+    for i in range(0,rows-height+1):
+        for j in range(0,cols-width+1):
 
             shifted = frozenset((tile[0]+i,tile[1]+j) for tile in start_pattern)
             if shifted.isdisjoint(constraint):
@@ -31,7 +40,7 @@ def findPlacements(pattern, edge = 5,constraint = []):
     
     return frozenset(placements)
 
-def parse_coord(raw: str, max=float('inf')): #this is called a type hint, tells us that raw is expected to be a string
+def parse_coord(raw: str, max=float('inf')): #raw: str is called a type hint, tells us that raw is expected to be a string
 
     digits = re.findall(r"\d+",raw)
     if len(digits) == 2:
@@ -40,4 +49,19 @@ def parse_coord(raw: str, max=float('inf')): #this is called a type hint, tells 
             return (r,c)
     return None
 
+def getDimension(prompt="[default prompt]",min_val = 1):
 
+    dim = input(prompt)
+    if dim.lower() in ("q","exit",""):
+        return None
+    validEntries = False
+    while not validEntries:
+        try:
+            dim = int(dim)
+            if (dim<min_val):
+                print(f"{RED}Invalid input: value must be at least {min_val}.{RESET}")
+                continue
+            validEntries = True
+        except ValueError:
+            print(f"{RED}Invalid input: value must be at least {min_val}.{RESET}")
+    return dim

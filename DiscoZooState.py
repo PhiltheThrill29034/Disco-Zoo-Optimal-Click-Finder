@@ -2,10 +2,20 @@ import math
 
 class DiscoZooState:
 
-    def __init__(self, parent, remaining_placements,last_click):
+    ROWS = 5
+    COLS = 5
+
+    def __init__(self, parent, remaining_placements,last_click,rows,cols):
         self.remaining_placements = remaining_placements
         self.last_click = last_click
         self.parent = parent
+
+    @classmethod
+    def set_grid_dimensions(cls, rows, cols):
+        cls.ROWS=rows
+        cls.COLS=cols
+        
+        
 
 
     @property
@@ -15,6 +25,8 @@ class DiscoZooState:
     @property
     def f(self):
         return self.gCost + self.evaluate()
+
+     
 
     def getChildren(self):
 
@@ -32,6 +44,7 @@ class DiscoZooState:
 
             ## survivors needs to be a frozenset so that it is hashable
             survivors = frozenset(p for p in self.remaining_placements if click not in p)
+
 
             child = DiscoZooState(self, survivors, click)
 
@@ -87,6 +100,8 @@ class DiscoZooState:
     def distanceFromCenter(self):
         if self.last_click is None:
             return 0
-        
+
+        mid_row = (DiscoZooState.ROWS-1)//2
+        mid_col = (DiscoZooState.COLS-1)//2
         r,c = self.last_click
-        return abs(r-2) + abs(c-2)
+        return abs(r-mid_row) + abs(c-mid_col)

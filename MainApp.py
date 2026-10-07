@@ -1,9 +1,11 @@
 import re
-from Utils import parse_coord,findPlacements
+from Utils import *
 from DiscoZooSolver import DiscoZooSolver
 from DiscoZooState import DiscoZooState
 from Animals import *
-print("Choose an animal from the available regions, or add your own, custom tiles!!")
+import time
+
+
 
 def pickFromRegion():
     print("Available Regions:",", ".join(r.capitalize() for r in REGIONS.keys()))
@@ -47,28 +49,30 @@ def pickFromRegion():
     
 
 
-def customTileInput():
+def customTileInput(min_tiles=2,max_tiles=5):
     print("Enter the tiles of your choice in the format (x,y)")
-    print("Remember that a row or column goes up to 5.")
-    print("You can enter up to 5 tiles, and at least 2 tiles. Press enter anytime to stop adding tiles.")
+    print(f"You can enter up to {max_tiles} tiles, and at least {min_tiles} tile(s). Press enter anytime to stop adding tiles.")
 
     pattern = []
    
-    while len(pattern)<5:
+    while len(pattern)<max_tiles:
         prompt = f"Enter tile {len(pattern) + 1}"
-        if len(pattern)>=2:
+        if len(pattern)>=min_tiles:
             prompt+=", or press enter to exit"
         tileIn = input(prompt+": ").strip()
         if not tileIn:
-            if (len(pattern)<2):
-                print("You have to enter at least two tiles!!")
+            if (len(pattern)<min_tiles):
+                exit = input("Would you like to exit and cancel the pattern? Press enter to confirm: ").strip()
+                if not exit:
+                    return None
                 continue
             break
+            
 
         tile = parse_coord(tileIn,5)
 
         if not tile:
-            print("Invalid Tile Format!! Use (row, col) between 1 and 5.")
+            print(f"Invalid Tile Format!! Use (row, col) between {min_tiles} and {max_tiles}.")
             continue
 
         zero_indexed_tile = (tile[0]-1, tile[1]-1)
@@ -78,42 +82,133 @@ def customTileInput():
             continue
 
         pattern.append(zero_indexed_tile)
-            
-            
-            
-        
+              
             
 
     return pattern
         
 
-def getSolution(pattern):
-    replacements = findPlacements(pattern)
+def getSolution(pattern,rows=5,cols=5):
+    
+    replacements = findPlacements(pattern,rows,cols)
 
+    DiscoZooState.set_grid_dimensions(rows,cols)
     initialState = DiscoZooState(None, replacements, None)
 
     solution = DiscoZooSolver.aStarSolver(initialState)
 
     if solution is not None:
-        print("Optimal Clicks Found!!!\n")
-        DiscoZooSolver.backtrackUI(solution)
+        return DiscoZooSolver.backtrack(solution)
     else:
-        print("No solution found...")
-
-while (True):
-    print("1. Custom Tile Input")
-    print("2. Choose an Animal from a Region")
-    choice = input("Pick: ")
+        return None
     
-    if (choice=="1"):
-        customTileInput()
-    elif (choice=="2"):
-        pattern = pickFromRegion()
-        
-        getSolution(pattern)
-        
-        
+def disco_zoo_version():
 
+    header = "     DISCO ZOO MODE (5x5 GRID)    "
+            
+    print(f"\n{BOLD}"+"═"*len(header)+f"{RESET}")
+    print(f"{BOLD}{header}{RESET}")
+    print(f"{BOLD}"+"═"*len(header)+f"{RESET}")
+    while (True):
+        pattern = None
+        
+        
+        print(f" {CYAN}[1]{RESET} Custom Animal Pattern")
+        print(f" {CYAN}[2]{RESET} Choose an Animal from a Region")
+        print(f" {DIM}[0] Exit{RESET}")
+        print(f"{DIM}──────────────────────────────────────{RESET}")
+
+        choice = input(f"{BOLD}Pick an option from the menu: {RESET}")
+        
+        if (choice=="1"):
+
+            pattern = customTileInput()
+
+        elif (choice=="2"):
+
+            pattern = pickFromRegion()
+
+        elif (choice=="0"):
+            print("\n")
+            break
+
+        if pattern is not None:
+
+            solution = getSolution(pattern)
+        
+            if solution is not None:
+                print(f"{GREEN}Optimal click sequence found!{RESET}")
+                DiscoZooSolver.printBoard(solution)
+            else:
+                print(f"{RED}No solution found...{RESET}")
+        
+    
+def custom_grid_version():
+
+    header = f"     CUSTOM GRID VERSION     "
+    print(f"\n{BOLD}"+"═"*len(header)+f"{RESET}")
+    print(f"{BOLD}{header}{RESET}")
+    print(f"{BOLD}"+"═"*len(header)+f"{RESET}")
+    while(True):
+        print(f"{DIM}Press enter, 'q', or type \"exit\" anytime to exit custom grid mode{RESET}")
+
+        rowNum = getDimension(f"{CYAN}[1]{RESET} Enter number of rows (or Enter to cancel): ")
+        
+        if rowNum is None:
+            print(f"{YELLOW}Exiting custom grid mode... {RESET}")
+            return
+        
+        colNum = getDimension(f"{CYAN}[2]{RESET} Enter number of columns (or Enter to cancel): ")
+        if colNum is None:
+            print(f"{YELLOW}Exiting custom grid mode... {RESET}")
+            return
+        
+        pattern = customTileInput(1,rowNum*colNum)
+
+        if pattern is not None:
+            print("Code reached here")
+            solution = getSolution(pattern,rowNum,colNum)
+            print("Checkpoint 2 - Solution computed")
+            if solution is not None:
+                print(f"{GREEN}Optimal click sequence found!{RESET}")
+                DiscoZooSolver.printBoard(solution,rowNum,colNum)
+            else:
+                print(f"{RED}No solution found!{RESET}")
+
+
+
+
+def main_loop():
+
+    header = "     MINIMUM SET COVER PATHFINDING ALGORITHM     "
+    print(f"\n{BOLD}"+"═"*len(header)+f"{RESET}")
+    print(f"{BOLD}{header}{RESET}")
+    print(f"\n{BOLD}"+"═"*len(header)+f"{RESET}")
+
+    while (True):
+        print(f" {CYAN}[1]{RESET} Disco Zoo Mode")
+        print(f" {CYAN}[2]{RESET} Custom Grid Size Mode")
+        print(f" {DIM}[0] Exit{RESET}")
+        print(f"{DIM}──────────────────────────────────────{RESET}")
+
+
+        
+        choice = input(f"{BOLD}Pick an option from the menu: {RESET}")
+
+        if (choice == "1"):
+            disco_zoo_version()
+        elif choice == "2":
+            custom_grid_version()
+        elif choice == "0":
+            print(f"{GREEN}Thank you for using the program! Bye!{RESET}")
+            break
+        else:
+            print(f"{YELLOW} Please pick a valid choice from the menu.{RESET}")
+
+
+        
+        
+main_loop()
 
 
 
