@@ -7,7 +7,7 @@ import time
 
 
 
-def pickFromRegion():
+def pick_from_region():
     print("Available Regions:",", ".join(r.capitalize() for r in REGIONS.keys()))
     print("(Type \"menu\" anytime to go back to the main selection menu)")
     
@@ -49,7 +49,7 @@ def pickFromRegion():
     
 
 
-def customTileInput(min_tiles=2,max_tiles=5):
+def custom_tile_input(min_tiles=2,max_tiles=5):
     print("Enter the tiles of your choice in the format (x,y)")
     print(f"You can enter up to {max_tiles} tiles, and at least {min_tiles} tile(s). Press enter anytime to stop adding tiles.")
 
@@ -88,11 +88,17 @@ def customTileInput(min_tiles=2,max_tiles=5):
     return pattern
         
 
-def getSolution(pattern,rows=5,cols=5):
+def get_solution(pattern,rows=5,cols=5):
     
     replacements = findPlacements(pattern,rows,cols)
 
     DiscoZooState.set_grid_dimensions(rows,cols)
+
+    try:
+        DiscoZooState.set_heuristic("disjoint")
+    except ValueError as e:
+        print(e)
+        return None
     initialState = DiscoZooState(None, replacements, None)
 
     solution = DiscoZooSolver.aStarSolver(initialState)
@@ -122,11 +128,11 @@ def disco_zoo_version():
         
         if (choice=="1"):
 
-            pattern = customTileInput()
+            pattern = custom_tile_input()
 
         elif (choice=="2"):
 
-            pattern = pickFromRegion()
+            pattern = pick_from_region()
 
         elif (choice=="0"):
             print("\n")
@@ -134,7 +140,7 @@ def disco_zoo_version():
 
         if pattern is not None:
 
-            solution = getSolution(pattern)
+            solution = get_solution(pattern)
         
             if solution is not None:
                 print(f"{GREEN}Optimal click sequence found!{RESET}")
@@ -163,11 +169,11 @@ def custom_grid_version():
             print(f"{YELLOW}Exiting custom grid mode... {RESET}")
             return
         
-        pattern = customTileInput(1,rowNum*colNum)
+        pattern = custom_tile_input(1,rowNum*colNum)
 
         if pattern is not None:
             print("Code reached here")
-            solution = getSolution(pattern,rowNum,colNum)
+            solution = get_solution(pattern,rowNum,colNum)
             print("Checkpoint 2 - Solution computed")
             if solution is not None:
                 print(f"{GREEN}Optimal click sequence found!{RESET}")

@@ -12,21 +12,17 @@ class DiscoZooSolver:
 
         closedSet = set()
 
-        initialState.evaluate()
+        initialState.h()
         
         heapq.heappush(frontier,initialState)
 
-        iter = 0
+        
 
         while len(frontier) > 0: # same as while len(frontier) > 0
-            iter +=1
+            
             
             current = heapq.heappop(frontier)
-            if iter % 2000 == 0:
-                print(f"[A*]: {iter} states explored\n" 
-                      f"Frontier size: {len(frontier)}\n"
-                      f"Depth: {current.gCost}"
-                      f"Remaining placements: {len(current.remaining_placements)}")
+            
 
             if (current.isFinal()):
                 return current
@@ -47,6 +43,49 @@ class DiscoZooSolver:
                 heapq.heappush(frontier,child)
 
         return None
+
+    @staticmethod
+    def aStarSolverDebug(initialState):
+    
+        frontier = []
+    
+        closedSet = set()
+    
+        initialState.h()
+            
+        heapq.heappush(frontier,initialState)
+    
+        iter = 0
+    
+        while len(frontier) > 0: # same as while len(frontier) > 0
+            iter +=1
+                
+            current = heapq.heappop(frontier)
+            if iter % 2000 == 0:
+                    print(f"[A*]: {iter} states explored\n" 
+                          f"Frontier size: {len(frontier)}\n"
+                          f"Depth: {current.gCost}"
+                          f"Remaining placements: {len(current.remaining_placements)}")
+    
+            if (current.isFinal()):
+                    return current
+    
+            if current in closedSet:
+                    continue
+    
+            closedSet.add(current)
+                
+            for child in current.getChildren():
+    
+                    
+                if child in closedSet:
+                    continue
+    
+                   
+    
+                heapq.heappush(frontier,child)
+    
+            return None
 
     @staticmethod
     def backtrack(final_state):

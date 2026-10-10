@@ -5,6 +5,9 @@ class DiscoZooState:
     ROWS = 5
     COLS = 5
 
+    HEURISTIC = "zero"
+    VALID_HEURISTICS = ("zero", "maxClicks", "disjoint")
+
     def __init__(self, parent, remaining_placements,last_click):
         self.remaining_placements = remaining_placements
         self.last_click = last_click
@@ -14,7 +17,12 @@ class DiscoZooState:
     def set_grid_dimensions(cls, rows, cols):
         cls.ROWS=rows
         cls.COLS=cols
-        
+
+    @classmethod
+    def set_heuristic(cls,heuristic):
+        if heuristic not in cls.VALID_HEURISTICS:
+            raise ValueError(f"Unknown heuristic {heuristic!r}. Valid heuristics: {cls.VALID_HEURISTICS}")
+        cls.HEURISTIC = heuristic
         
 
 
@@ -24,7 +32,7 @@ class DiscoZooState:
 
     @property
     def f(self):
-        return self.gCost + self.evaluate()
+        return self.gCost + self.h()
 
      
 
@@ -77,8 +85,10 @@ class DiscoZooState:
         else:
             return self.distanceFromCenter() < other.distanceFromCenter()
 
-
-    def evaluate(self):
+    def h_zero(self):
+        return 0
+    
+    def h_maxClicks(self):
 
         
         remaining = len(self.remaining_placements)
@@ -91,6 +101,18 @@ class DiscoZooState:
 
         return math.ceil(remaining/pattern_size)
 
+    def h_disjoint(self):
+        disjointSets = set()
+        count = 0;
+        for placement in self.remaining_placements:
+            if placement.isdisjoint(disjointSets):
+                count+=1
+                disjointSets = disjointSets.union(placement)
+        return count
+
+    def h(self):
+        return getattr(self,f"h_{self.HEURISTIC}")()
+    
     def isFinal(self):
         return len(self.remaining_placements) == 0
 
@@ -105,3 +127,4 @@ class DiscoZooState:
         mid_col = (DiscoZooState.COLS-1)//2
         r,c = self.last_click
         return abs(r-mid_row) + abs(c-mid_col)
+
